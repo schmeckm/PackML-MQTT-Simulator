@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - name: Publish to Registry
+    - name: Publish to Registry2
       uses: elgohr/Publish-Docker-Github-Action@v5
       with:
         name: schmeckm/it_ot_application
