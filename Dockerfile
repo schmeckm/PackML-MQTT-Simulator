@@ -2,12 +2,12 @@
 FROM node:14
 
 # Labels
-LABEL maintainer="tom.hollingworth@spruiktec.com"
+LABEL maintainer="markus.schmeckenbecher@gmail.com"
 LABEL org.opencontainers.image.authors="tom.hollingworth@spruiktec.com"
-LABEL org.opencontainers.image.source="https://github.com/Spruik/PackML-MQTT-Simulator"
+LABEL org.opencontainers.image.source="https://github.com/schmeckm/PackML-MQTT-Simulator"
 LABEL org.opencontainers.image.url="https://spruiktec.com/"
 LABEL org.opencontainers.image.vendor="Spruik Technologies LLC"
-LABEL org.opencontainers.image.version="2.0.4"
+LABEL org.opencontainers.image.version="2.0.5"
 
 # Setzen des Arbeitsverzeichnisses
 WORKDIR /machine
