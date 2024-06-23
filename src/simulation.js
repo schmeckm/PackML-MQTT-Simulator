@@ -60,10 +60,10 @@ module.exports.simulate = (mode, state, tags, millis = 1000, client) => {
         if (state) {
             if (state.state === 'execute') {
                 // Rate Flicker: randomly adjust the machine speed based on isCurMachSpeedFlicker probabilities
-                const flicker = exports.weightedRandom(isCurMachSpeedFlicker);
+                const flicker = module.exports.weightedRandom(isCurMachSpeedFlicker);
                 if (flicker === 'flick') {
                     if (tags.status.curMachSpeed > 0.0) {
-                        tags.status.curMachSpeed += (2.5 - 5 * exports.randomBoxMuller());
+                        tags.status.curMachSpeed += (2.5 - 5 * module.exports.randomBoxMuller());
                     }
                 }
 
@@ -83,7 +83,7 @@ module.exports.simulate = (mode, state, tags, millis = 1000, client) => {
                 }
 
                 // Chance of Suspending
-                const diceRoll = exports.weightedRandom(executeAvailabilityProbabilities);
+                const diceRoll = module.exports.weightedRandom(executeAvailabilityProbabilities);
                 if (diceRoll === 'suspend') {
                     state.suspend();
                 }
@@ -108,23 +108,44 @@ module.exports.simulate = (mode, state, tags, millis = 1000, client) => {
                     };
 
                     // Produce finished goods or defective products based on quality probabilities
-                    const qualityRoll = exports.weightedRandom(adjustedQualityProbabilities);
+                    const qualityRoll = module.exports.weightedRandom(adjustedQualityProbabilities);
                     if (qualityRoll === 'good') {
                         tags.admin.prodProcessedCount[0].count += consumed;
                         tags.admin.prodProcessedCount[0].accCount += consumed;
+
                         // Publish updated processed count to MQTT
-                        let metric = {
-                            name: 'Admin/ProdProcessedCount/0/Count',
+                        let metricProcessed = {
+                            name: `${global.config.topicPrefix}/Admin/ProdProcessedCount/0/Count`,
                             value: tags.admin.prodProcessedCount[0].count,
                             type: "Int32",
                             alias: 3,
                             timestamp: Date.now()
                         };
-                        client.publish(metric.name, JSON.stringify(metric));
+                        client.publish(metricProcessed.name, JSON.stringify(metricProcessed));
                     } else {
                         tags.admin.prodDefectiveCount[0].count += consumed;
                         tags.admin.prodDefectiveCount[0].accCount += consumed;
+
+                        // Publish updated defective count to MQTT
+                        let metricDefective = {
+                            name: `${global.config.topicPrefix}/Admin/ProdDefectiveCount/0/Count`,
+                            value: tags.admin.prodDefectiveCount[0].count,
+                            type: "Int32",
+                            alias: 4,
+                            timestamp: Date.now()
+                        };
+                        client.publish(metricDefective.name, JSON.stringify(metricDefective));
                     }
+
+                    // Publish updated consumed count to MQTT
+                    let metricConsumed = {
+                        name: `${global.config.topicPrefix}/Admin/ProdConsumedCount/0/Count`,
+                        value: tags.admin.prodConsumedCount[0].count,
+                        type: "Int32",
+                        alias: 2,
+                        timestamp: Date.now()
+                    };
+                    client.publish(metricConsumed.name, JSON.stringify(metricConsumed));
                 }
 
             } else if (state.state === 'suspended' || state.state === 'stopped' || state.state === 'idle') {
@@ -134,7 +155,7 @@ module.exports.simulate = (mode, state, tags, millis = 1000, client) => {
                 }
 
                 // Chance of Unsuspend
-                const diceRoll = exports.weightedRandom(executeUnspendProbabilities);
+                const diceRoll = module.exports.weightedRandom(executeUnspendProbabilities);
                 if (diceRoll === 'unsuspend') {
                     state.unsuspend();
                 }
