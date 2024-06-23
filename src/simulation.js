@@ -91,7 +91,7 @@ module.exports.simulate = (mode, state, tags, millis = 1000) => {
                 // Update production and consumption based on current machine speed
                 if (tags.status.curMachSpeed > 0) {
                     // Consume raw material
-                    const consumed = tags.status.curMachSpeed / 60.0; // Adjust consumption rate
+                    const consumed = (tags.status.curMachSpeed / tags.admin.machDesignSpeed) / 60.0; // Adjust consumption rate
                     tags.admin.prodConsumedCount[0].count += consumed;
                     tags.admin.prodConsumedCount[0].accCount += consumed;
 
@@ -112,6 +112,15 @@ module.exports.simulate = (mode, state, tags, millis = 1000) => {
                     if (qualityRoll === 'good') {
                         tags.admin.prodProcessedCount[0].count += consumed;
                         tags.admin.prodProcessedCount[0].accCount += consumed;
+                        // Publish updated processed count to MQTT
+                        let metric = {
+                            name: 'Admin/ProdProcessedCount/0/Count',
+                            value: tags.admin.prodProcessedCount[0].count,
+                            type: "Int32",
+                            alias: 3,
+                            timestamp: Date.now()
+                        };
+                        client.publish(metric.name, JSON.stringify(metric));
                     } else {
                         tags.admin.prodDefectiveCount[0].count += consumed;
                         tags.admin.prodDefectiveCount[0].accCount += consumed;
