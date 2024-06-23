@@ -24,7 +24,7 @@ const executeAvailabilityProbabilities = { nothing: 0.9985, suspend: 0.0015 };
 const executeUnspendProbabilities = { nothing: 0.995, unsuspend: 0.005 };
 const isCurMachSpeedFlicker = { flick: 0.2, nothing: 0.8 };
 
-module.exports.simulate = (mode, state, tags, millis = 1000) => {
+module.exports.simulate = (mode, state, tags, millis = 1000, client) => {
     // Go to Production
     mode.goto('production');
 
