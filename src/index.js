@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
 'use strict'
-
-// Imports
 const logging = require('./logging')
 const packmlModel = require('./packml-model')
 const packmlTags = require('./packml-tags')
@@ -297,7 +295,7 @@ client.on('message', (topic, message) => {
                 })
             }
             while (tags.status.product[index].ingredient[ingredientIndex].parameter <= parameterIndex) {
-                tags.status.product[index].ingredient[ingredientIndex].parameter.push(new packmlTags.Parameter())
+                tags.status.product[index].ingredient[parameterIndex].parameter.push(new packmlTags.Parameter())
             }
             tags.status.product[index].ingredient[ingredientIndex].parameter[parameterIndex][helper.camelCase(bits[6])] = message
         }
