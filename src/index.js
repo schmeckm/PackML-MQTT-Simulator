@@ -55,20 +55,19 @@ var mode = new packmlModel.UnitMode()
 
 // Publish PackML Tags on Change
 var changed = (a, b, c) => {
-    if (a == null || b == null || c == null) {
-        throw Error('Should change null')
+        if (a == null || b == null || c == null) {
+            throw Error('Should change null')
+        }
+        // Special Overloads
+        b = b === 'productId' ? 'ProductID' : b
+        b = b === 'ingredientId' ? 'IngredientID' : b
+        b = b === 'id' ? 'ID' : b
+        b = helper.titleCase(b) // Normal Overload
+        const topic = global.config.topicPrefix + '/' + a.replace('.', '/') + b
+        logger.info(`${topic} : ${c}`)
+        client.publish(topic, c, { retain: true })
     }
-    // Special Overloads
-    b = b === 'productId' ? 'ProductID' : b
-    b = b === 'ingredientId' ? 'IngredientID' : b
-    b = b === 'id' ? 'ID' : b
-    b = helper.titleCase(b) // Normal Overload
-    const topic = global.config.topicPrefix + '/' + a.replace('.', '/') + b
-    logger.info(`${topic} : ${c}`)
-    client.publish(topic, c, { retain: true })
-}
-
-// PackML Tags
+    // PackML Tags
 var tags = new Proxy(new packmlTags.PackmlTags(changed), {
     set(target, prop, value) {
         changed('', prop, value)
@@ -137,11 +136,11 @@ client.on('connect', (packet) => {
             tags.status.unitModeCurrent = packmlModel.getModeIntByModeText(lifecycle.to);
         })
         // Simulate
-    global.sim = simulation.simulate(mode, state, tags, global.config.TICK)
+    global.sim = simulation.simulate(mode, state, tags, global.config.TICK, client)
 })
 
 client.on('close', () => {
-    logger.info(`Disconnected from ${client.options().href || globalConfig.MQTT_URL}:${client.options().port}`)
+    logger.info(`Disconnected from ${client.options().href || global.config.MQTT_URL}:${client.options().port}`)
 })
 
 // Handle PackML Commands
@@ -171,21 +170,16 @@ client.on('message', (topic, message) => {
             logger.error('Cannot change to unknown UnitMode')
         }
     } else if (topic.match(machineSpeedCommandTopic)) {
-        const newMachSpeed = parseFloat(message)
-        if (Number.isNaN(newMachSpeed)) {
+        if (Number.isNaN(message)) {
             logger.error(`Bad request: ${topic} Must be a number`)
             return
         }
+        const newMachSpeed = parseFloat(message)
         if (newMachSpeed < 0 || newMachSpeed > tags.admin.machDesignSpeed) {
             logger.error(`Bad request: ${topic} Must be >= 0 and <= Admin/MachDesignSpeed (${tags.admin.machDesignSpeed})`)
             return
         }
-        // Set the machine speed only if in 'execute' state
-        if (state.state === 'execute') {
-            simulation.setMachSpeed(tags, newMachSpeed) // Changed: Call setMachSpeed only if in 'execute' state
-        } else {
-            logger.error('Cannot set machine speed when not in execute state') // Changed: Log an error if not in 'execute' state
-        }
+        tags.status.machSpeed = newMachSpeed
     } else if (topic.match(packmlParameters)) {
         // Parameters
         const bits = topic.match(packmlParameters)
@@ -193,13 +187,13 @@ client.on('message', (topic, message) => {
         if (bits[2] === 'ID') {
             message = parseInt(message)
             if (isNaN(message)) {
-                logger.error(`Bad request: ${topic} Must be an number`)
+                logger.error(`Bad request: ${topic} Must be a number`)
                 return
             }
         } else if (bits[2] === 'Value') {
             message = parseFloat(message)
             if (isNaN(message)) {
-                logger.error(`Bad request: ${topic} Must be an number`)
+                logger.error(`Bad request: ${topic} Must be a number`)
                 return
             }
         }
@@ -234,7 +228,7 @@ client.on('message', (topic, message) => {
             }
             message = parseInt(message)
             if (isNaN(message)) {
-                logger.error(`Bad request: ${topic} Must be an number`)
+                logger.error(`Bad request: ${topic} Must be a number`)
                 return
             }
             tags.status.product[index].productId = message
@@ -252,13 +246,13 @@ client.on('message', (topic, message) => {
                 if (bits[4] === 'ID') {
                     message = parseInt(message)
                     if (isNaN(message)) {
-                        logger.error(`Bad request: ${topic} Must be an number`)
+                        logger.error(`Bad request: ${topic} Must be a number`)
                         return
                     }
                 } else if (bits[4] === 'Value') {
                     message = parseFloat(message)
                     if (isNaN(message)) {
-                        logger.error(`Bad request: ${topic} Must be an number`)
+                        logger.error(`Bad request: ${topic} Must be a number`)
                         return
                     }
                 }
@@ -281,13 +275,13 @@ client.on('message', (topic, message) => {
             if (bits[6] === 'ID') {
                 message = parseInt(message)
                 if (isNaN(message)) {
-                    logger.error(`Bad request: ${topic} Must be an number`)
+                    logger.error(`Bad request: ${topic} Must be a number`)
                     return
                 }
             } else if (bits[6] === 'Value') {
                 message = parseFloat(message)
                 if (isNaN(message)) {
-                    logger.error(`Bad request: ${topic} Must be an number`)
+                    logger.error(`Bad request: ${topic} Must be a number`)
                     return
                 }
             }
