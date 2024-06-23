@@ -59,7 +59,7 @@ module.exports.simulate = (mode, state, tags, millis = 1000) => {
     return setInterval(() => {
         if (state) {
             if (state.state === 'execute') {
-                // Rate Flicker
+                // Rate Flicker: randomly adjust the machine speed based on isCurMachSpeedFlicker probabilities
                 const flicker = exports.weightedRandom(isCurMachSpeedFlicker);
                 if (flicker === 'flick') {
                     if (tags.status.curMachSpeed > 0.0) {
