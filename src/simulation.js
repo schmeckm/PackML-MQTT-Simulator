@@ -29,7 +29,7 @@ module.exports.simulate = (mode, state, tags, millis = 1000) => {
     mode.goto('production');
 
     // Setup Speed Rates
-    tags.admin.machDesignSpeed = 200.0; // Maximum speed corresponding to 200% capacity
+    tags.admin.machDesignSpeed = 100.0; // Default design speed, can be adjusted
     tags.status.machSpeed = 100.0; // Default speed (100% capacity)
     tags.status.curMachSpeed = 0.0; // Initial speed
 
@@ -91,15 +91,15 @@ module.exports.simulate = (mode, state, tags, millis = 1000) => {
                 // Update production and consumption based on current machine speed
                 if (tags.status.curMachSpeed > 0) {
                     // Consume raw material
-                    const consumed = tags.status.curMachSpeed / 60.0;
+                    const consumed = tags.status.curMachSpeed / 60.0; // Adjust consumption rate
                     tags.admin.prodConsumedCount[0].count += consumed;
                     tags.admin.prodConsumedCount[0].accCount += consumed;
 
                     // Adjust defect probability based on speed
                     let defectProbability = 0.1; // Base defect probability
-                    if (tags.status.curMachSpeed > 100.0) {
-                        // Increase defect probability for speeds above 100%
-                        defectProbability += (tags.status.curMachSpeed - 100.0) / 100.0 * 0.1;
+                    if (tags.status.curMachSpeed > tags.admin.machDesignSpeed) {
+                        // Increase defect probability for speeds above MachDesignSpeed
+                        defectProbability += (tags.status.curMachSpeed - tags.admin.machDesignSpeed) / tags.admin.machDesignSpeed * 0.1;
                     }
 
                     const adjustedQualityProbabilities = {
