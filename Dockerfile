@@ -1,5 +1,5 @@
 # Verwenden Sie ein offizielles Node.js-Image als Basis-Image
-FROM node:14-alpine
+FROM node:14
 
 # Labels
 LABEL maintainer="tom.hollingworth@spruiktec.com"
