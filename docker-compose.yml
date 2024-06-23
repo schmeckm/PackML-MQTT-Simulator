@@ -1,35 +1,13 @@
 version: "2.4"
 
 services:
-  bathurst-packaging-line1:
+    greenville-cnc-line1:
     image: spruiktec/packml-simulator
     environment:
-      SITE: Bathurst
+      SITE: Basel
       AREA: Packaging
-      LINE: 'Line 1'
-      MQTT_URL: 'mqtt://localhost'
-      MQTT_USERNAME: 'system'
-      MQTT_PASSWORD: 'public'
-    mem_limit: 30MB
-
-  bathurst-packaging-line2:
-    image: spruiktec/packml-simulator
-    environment:
-      SITE: Bathurst
-      AREA: Packaging
-      LINE: 'Line 2'
-      MQTT_URL: 'mqtt://localhost'
-      MQTT_USERNAME: 'system'
-      MQTT_PASSWORD: 'public'
-    mem_limit: 30MB
-
-  greenville-cnc-line1:
-    image: spruiktec/packml-simulator
-    environment:
-      SITE: Greenville
-      AREA: CNC
-      LINE: 'Line 1'
-      MQTT_URL: 'mqtt://localhost'
+      LINE: 'Falcon11'
+      MQTT_URL: 'mqtt://hivemqt'
       MQTT_USERNAME: 'system'
       MQTT_PASSWORD: 'public'
       CLIENT_TYPE: sparkplugb
